@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T20 Mobile — harness</title>
+<link rel="stylesheet" href="../styles/t20-mobile.css">
+<script src="./mock-foundry.js"></script>
+</head>
+<body class="vtt game">
+<div id="interface">UI do Foundry (deve ficar escondida)</div>
+<canvas id="board"></canvas>
+<script type="module">
+  import "../scripts/t20-mobile.mjs";
+  // dispara o ciclo de vida que o Foundry dispararia
+  Hooks.call("init");
+  Hooks.call("ready");
+  window.T20M_READY = true;
+</script>
+</body>
+</html>

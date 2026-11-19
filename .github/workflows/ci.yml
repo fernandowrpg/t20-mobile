@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  check:
+    name: Validar módulo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Sintaxe dos scripts
+        run: |
+          node --check scripts/t20-mobile.mjs
+          node --check test/mock-foundry.js
+
+      - name: module.json é JSON válido e tem os campos obrigatórios
+        run: |
+          jq -e '
+            .id and .title and .version
+            and .compatibility.minimum
+            and (.esmodules | length > 0)
+            and (.styles   | length > 0)
+          ' module.json > /dev/null
+          echo "OK"
+
+      # Todo arquivo declarado no manifesto precisa existir de fato,
+      # senão o Foundry falha silenciosamente ao carregar o módulo.
+      - name: Arquivos declarados existem
+        run: |
+          status=0
+          for f in $(jq -r '(.esmodules // [])[], (.styles // [])[]' module.json); do
+            if [ -f "$f" ]; then
+              echo "ok   $f"
+            else
+              echo "::error::declarado no module.json mas ausente: $f"
+              status=1
+            fi
+          done
+          exit $status

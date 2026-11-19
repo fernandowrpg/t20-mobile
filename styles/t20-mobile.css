@@ -1,0 +1,449 @@
+/* ============================================================
+   T20 Mobile — interface touch-first para Tormenta20
+   ============================================================ */
+
+:root {
+	--t20m-bg: #14110f;
+	--t20m-surface: #201b18;
+	--t20m-surface-2: #2b2420;
+	--t20m-line: #3d342e;
+	--t20m-text: #f0e9e2;
+	--t20m-muted: #a79a8e;
+	--t20m-accent: #b8352f;
+	--t20m-accent-soft: #7d2420;
+	--t20m-pv: #c0392b;
+	--t20m-pm: #2e6fa8;
+	--t20m-tap: 48px;
+}
+
+/* ---------- botao flutuante para entrar ---------- */
+
+#t20m-launcher {
+	position: fixed;
+	right: 12px;
+	bottom: 12px;
+	z-index: 90;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-accent);
+	color: #fff;
+	font: 700 13px/1 system-ui, sans-serif;
+	cursor: pointer;
+	box-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
+}
+
+/* ---------- esconder a UI padrao do Foundry ---------- */
+
+body.t20m-on #interface,
+body.t20m-on #board,
+body.t20m-on canvas#board,
+body.t20m-on #pause,
+body.t20m-on #tooltip,
+body.t20m-on #hotbar,
+body.t20m-on #navigation,
+body.t20m-on #controls,
+body.t20m-on #players,
+body.t20m-on #sidebar,
+body.t20m-on #ui-left,
+body.t20m-on #ui-right,
+body.t20m-on #ui-top,
+body.t20m-on #ui-bottom,
+body.t20m-on #ui-middle {
+	display: none !important;
+}
+
+/* Dialogos do sistema (AbilityUseDialog etc.) precisam continuar visiveis
+   e por cima da nossa UI, senao "Mostrar dialogo de uso" fica inutilizavel. */
+body.t20m-on .application,
+body.t20m-on .window-app,
+body.t20m-on dialog,
+body.t20m-on #notifications {
+	display: revert !important;
+	z-index: 200 !important;
+}
+
+body.t20m-on {
+	overflow: hidden;
+	background: var(--t20m-bg);
+}
+
+/* ---------- shell ---------- */
+
+#t20m-root {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	background: var(--t20m-bg);
+	color: var(--t20m-text);
+	font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+	-webkit-text-size-adjust: 100%;
+	overscroll-behavior: contain;
+}
+
+#t20m-root *,
+#t20m-root *::before,
+#t20m-root *::after {
+	box-sizing: border-box;
+}
+
+#t20m-root button {
+	font-family: inherit;
+	-webkit-tap-highlight-color: transparent;
+	touch-action: manipulation;
+	cursor: pointer;
+}
+
+#t20m-root button:active {
+	transform: scale(0.97);
+}
+
+/* ---------- header ---------- */
+
+.t20m-head {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 8px;
+	padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px;
+	background: var(--t20m-surface);
+	border-bottom: 1px solid var(--t20m-line);
+}
+
+.t20m-actor-select {
+	min-height: 40px;
+	padding: 6px 10px;
+	border-radius: 8px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface-2);
+	color: var(--t20m-text);
+	font: 600 16px/1.2 inherit;
+	max-width: 100%;
+}
+
+.t20m-exit {
+	width: 40px;
+	height: 40px;
+	border-radius: 8px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface-2);
+	color: var(--t20m-muted);
+	font-size: 18px;
+}
+
+.t20m-vitals {
+	grid-column: 1 / -1;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	margin-top: 4px;
+}
+
+/* ---------- barras de recurso ---------- */
+
+.t20m-res {
+	grid-column: 1 / -1;
+	display: grid;
+	grid-template-columns: var(--t20m-tap) 1fr auto var(--t20m-tap);
+	align-items: center;
+	gap: 8px;
+}
+
+.t20m-bar {
+	position: relative;
+	height: 14px;
+	border-radius: 7px;
+	background: #000;
+	border: 1px solid var(--t20m-line);
+	overflow: hidden;
+}
+
+.t20m-bar-fill {
+	height: 100%;
+	transition: width 0.18s ease-out;
+}
+
+.t20m-pv .t20m-bar-fill { background: var(--t20m-pv); }
+.t20m-pm .t20m-bar-fill { background: var(--t20m-pm); }
+
+.t20m-res-text {
+	font: 600 13px/1 inherit;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+	color: var(--t20m-muted);
+}
+
+.t20m-step {
+	height: var(--t20m-tap);
+	min-width: var(--t20m-tap);
+	border-radius: 8px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface-2);
+	color: var(--t20m-text);
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.t20m-stat {
+	display: flex;
+	align-items: baseline;
+	justify-content: center;
+	gap: 6px;
+	padding: 6px;
+	border-radius: 8px;
+	background: var(--t20m-surface-2);
+	border: 1px solid var(--t20m-line);
+}
+
+.t20m-stat-label {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--t20m-muted);
+}
+
+.t20m-stat-value {
+	font: 700 18px/1 inherit;
+	font-variant-numeric: tabular-nums;
+}
+
+/* ---------- corpo ---------- */
+
+.t20m-body {
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	padding: 12px 12px 20px;
+}
+
+.t20m-h {
+	margin: 18px 0 8px;
+	font: 700 12px/1 inherit;
+	text-transform: uppercase;
+	letter-spacing: 0.09em;
+	color: var(--t20m-muted);
+}
+
+.t20m-h:first-child { margin-top: 0; }
+
+.t20m-note {
+	margin: 24px 4px;
+	color: var(--t20m-muted);
+	text-align: center;
+}
+
+/* ---------- atributos ---------- */
+
+.t20m-grid-atr {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 8px;
+}
+
+.t20m-big {
+	display: grid;
+	gap: 2px;
+	place-items: center;
+	min-height: 72px;
+	padding: 8px 4px;
+	border-radius: 10px;
+	border: 1px solid var(--t20m-line);
+	background: linear-gradient(180deg, var(--t20m-surface-2), var(--t20m-surface));
+	color: var(--t20m-text);
+}
+
+.t20m-big-label {
+	font: 600 12px/1 inherit;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--t20m-muted);
+	text-align: center;
+}
+
+.t20m-big-value {
+	font: 700 24px/1 inherit;
+	font-variant-numeric: tabular-nums;
+}
+
+.t20m-quick { display: grid; gap: 8px; }
+.t20m-quick .t20m-big { min-height: 60px; }
+
+/* ---------- linhas de arma ---------- */
+
+.t20m-row {
+	display: grid;
+	gap: 8px;
+	padding: 10px;
+	margin-bottom: 8px;
+	border-radius: 10px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface);
+}
+
+.t20m-row-name {
+	font-weight: 600;
+}
+
+.t20m-row-actions {
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: 1fr;
+	gap: 8px;
+}
+
+.t20m-small {
+	min-height: var(--t20m-tap);
+	padding: 0 10px;
+	border-radius: 8px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface-2);
+	color: var(--t20m-text);
+	font: 600 14px/1 inherit;
+}
+
+/* O botao principal da linha e marcado explicitamente, nao por posicao:
+   uma arma sem ataque nao deve pintar "Dano" como se fosse o ataque. */
+.t20m-small.primary {
+	border-color: var(--t20m-accent-soft);
+	background: var(--t20m-accent-soft);
+	color: #fff;
+}
+
+/* ---------- pericias / itens ---------- */
+
+.t20m-filter {
+	width: 100%;
+	min-height: var(--t20m-tap);
+	margin-bottom: 10px;
+	padding: 8px 12px;
+	border-radius: 10px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface-2);
+	color: var(--t20m-text);
+	font: 16px/1.2 inherit;
+}
+
+.t20m-list { display: grid; gap: 6px; }
+
+.t20m-skill {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	min-height: var(--t20m-tap);
+	padding: 8px 12px;
+	margin-bottom: 6px;
+	border-radius: 10px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface);
+	color: var(--t20m-text);
+	text-align: left;
+}
+
+.t20m-skill.untrained { opacity: 0.62; }
+
+/* "Somente treinada" sem treino: o teste nem e permitido pelas regras. */
+.t20m-skill.blocked {
+	opacity: 0.4;
+	border-style: dashed;
+}
+
+.t20m-skill-abl {
+	margin-left: 8px;
+	padding: 2px 6px;
+	border-radius: 5px;
+	background: var(--t20m-surface-2);
+	border: 1px solid var(--t20m-line);
+	font: 600 10px/1.4 inherit;
+	letter-spacing: 0.04em;
+	color: var(--t20m-muted);
+	vertical-align: middle;
+}
+
+.t20m-skill-name { font-weight: 500; }
+
+.t20m-skill-val {
+	font: 700 17px/1 inherit;
+	font-variant-numeric: tabular-nums;
+	color: var(--t20m-text);
+}
+
+/* ---------- chat ---------- */
+
+.t20m-chat {
+	display: grid;
+	gap: 8px;
+}
+
+.t20m-msg {
+	padding: 8px;
+	border-radius: 10px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface);
+	font-size: 14px;
+	overflow-wrap: anywhere;
+}
+
+.t20m-msg .message-header,
+.t20m-msg .dice-formula,
+.t20m-msg .dice-total {
+	color: var(--t20m-text);
+}
+
+.t20m-msg img { max-width: 100%; height: auto; }
+
+/* ---------- tabs ---------- */
+
+.t20m-tabs {
+	display: grid;
+	grid-auto-flow: column;
+	grid-auto-columns: 1fr;
+	border-top: 1px solid var(--t20m-line);
+	background: var(--t20m-surface);
+	padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.t20m-tabs button {
+	min-height: 54px;
+	border: 0;
+	background: transparent;
+	color: var(--t20m-muted);
+	font: 600 13px/1 inherit;
+	border-top: 2px solid transparent;
+}
+
+.t20m-tabs button.active {
+	color: var(--t20m-text);
+	border-top-color: var(--t20m-accent);
+	background: var(--t20m-surface-2);
+}
+
+.t20m-tabs button.t20m-pulse {
+	animation: t20m-pulse 1.1s ease-in-out infinite;
+	color: var(--t20m-accent);
+}
+
+@keyframes t20m-pulse {
+	50% { opacity: 0.45; }
+}
+
+/* ---------- telas largas: centraliza ---------- */
+
+@media (min-width: 720px) {
+	#t20m-root {
+		max-width: 520px;
+		inset: 0 auto 0 50%;
+		transform: translateX(-50%);
+		border-left: 1px solid var(--t20m-line);
+		border-right: 1px solid var(--t20m-line);
+	}
+	.t20m-grid-atr { grid-template-columns: repeat(6, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#t20m-root button:active { transform: none; }
+	.t20m-bar-fill { transition: none; }
+	.t20m-tabs button.t20m-pulse { animation: none; }
+}

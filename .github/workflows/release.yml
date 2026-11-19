@@ -1,0 +1,72 @@
+name: Release
+
+# Dispara ao empurrar uma tag v*, ex.: git tag v0.1.0 && git push origin v0.1.0
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publicar release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Derivar versão da tag
+        id: meta
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "tag=${TAG}"            >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}"      >> "$GITHUB_OUTPUT"
+
+      # Falha cedo se esqueceram de bumpar o module.json antes de taggear.
+      - name: Conferir que module.json casa com a tag
+        run: |
+          MANIFEST_VERSION="$(jq -r '.version' module.json)"
+          TAG_VERSION="${{ steps.meta.outputs.version }}"
+          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::module.json diz version=$MANIFEST_VERSION mas a tag é ${{ steps.meta.outputs.tag }}."
+            echo "::error::Atualize o \"version\" no module.json e refaça a tag."
+            exit 1
+          fi
+          echo "OK: versão $TAG_VERSION"
+
+      # O Foundry usa `manifest` (sempre latest) para detectar atualizações
+      # e `download` (fixo na versão) para baixar o pacote daquela release.
+      - name: Injetar URLs de manifest e download
+        run: |
+          jq \
+            --arg manifest "https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/module.json" \
+            --arg download "https://github.com/${GITHUB_REPOSITORY}/releases/download/${{ steps.meta.outputs.tag }}/module.zip" \
+            '.manifest = $manifest | .download = $download' \
+            module.json > module.json.tmp
+          mv module.json.tmp module.json
+          echo "--- module.json final ---"
+          cat module.json
+
+      - name: Montar module.zip
+        run: |
+          zip -r module.zip \
+            module.json \
+            scripts \
+            styles \
+            README.md \
+            CHANGELOG.md \
+            LICENSE
+          echo "--- conteúdo do zip ---"
+          unzip -l module.zip
+
+      - name: Criar a release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.meta.outputs.tag }}
+          generate_release_notes: true
+          files: |
+            module.json
+            module.zip

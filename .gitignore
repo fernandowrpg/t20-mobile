@@ -1,0 +1,11 @@
+# Artefatos de build
+module.zip
+module.json.tmp
+
+# Saída dos testes locais
+test/*.png
+
+# Dependências e lixo de editor
+node_modules/
+.DS_Store
+*.log
