@@ -4,6 +4,26 @@ Todas as mudanças relevantes deste módulo são documentadas aqui.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/)
 e o versionamento segue [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.1.1] - 2026-11-19
+
+### Corrigido
+
+- O botão de excluir mensagem no chat não funcionava. Os controles nativos da
+  mensagem têm os listeners ligados pelo ChatLog da sidebar, não pelo elemento;
+  renderizada solta na aba Chat, a mensagem vinha com os botões mortos. Agora os
+  controles nativos ficam escondidos e o módulo oferece o próprio botão
+  **Excluir**, que chama `msg.delete()` direto. Ele aparece apenas para o GM ou
+  para o autor da mensagem.
+
+### Adicionado
+
+- Ao entrar no modo mobile, o módulo oferece ligar o **Disable Game Canvas** do
+  Foundry (`core.noCanvas`), que impede a cena de ser carregada no aparelho. É
+  uma configuração de cliente: vale por navegador e não afeta os outros
+  jogadores. Nova configuração "Oferecer desligar o canvas neste dispositivo"
+  controla a sugestão.
+- A aba Chat agora reage a exclusão e edição de mensagens, não só a criação.
+
 ## [0.1.0] - 2026-11-19
 
 ### Adicionado
@@ -21,4 +41,5 @@ e o versionamento segue [SemVer](https://semver.org/lang/pt-BR/).
 - Configuração para abrir ou pular o diálogo de uso do sistema, compatível com
   os dois valores de `tormenta20.UsageConfig`.
 
+[0.1.1]: https://github.com/fernandowrpg/t20-mobile/releases/tag/v0.1.1
 [0.1.0]: https://github.com/fernandowrpg/t20-mobile/releases/tag/v0.1.0

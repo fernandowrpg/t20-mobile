@@ -61,6 +61,19 @@ flutuante "T20" no canto inferior direito para entrar no modo mobile.
 
 Para instalar como app no celular, use "Adicionar à tela de início" no navegador.
 
+### Não carregar a cena no celular
+
+O Foundry só serve o cliente em `/game` — módulos rodam no navegador e não podem
+registrar rotas no servidor, então não há uma rota alternativa mais leve.
+
+O que resolve é o **Disable Game Canvas**, uma opção nativa do Foundry em
+*Configurar Definições → Core*. Ela é uma configuração de **cliente**: vale por
+navegador e aparelho, e existe justamente para que dispositivos fracos entrem no
+mundo sem o custo do WebGL. Ligada no celular, a cena nunca é carregada lá, e o
+seu PC continua normal.
+
+Na primeira vez que o modo mobile abre, o módulo oferece ligar isso para você.
+
 ### Abas
 
 - **Ações** — atributos, armas (Ataque / Dano / Card) e iniciativa.
@@ -77,7 +90,8 @@ O cabeçalho mostra PV/PM com steppers de −1/+1, Defesa e Nível.
 |---|---|---|
 | Ativar automaticamente em telas pequenas | ligado | Entra no modo mobile sozinho |
 | Mostrar diálogo de uso nas rolagens | desligado | Um toque rola direto; ligado, abre o diálogo de efeitos do sistema |
-| Suspender o canvas no modo mobile | ligado | Para o renderizador do mapa. Economiza bateria e memória |
+| Oferecer desligar o canvas neste dispositivo | ligado | Sugere ligar o `Disable Game Canvas` ao entrar no modo mobile |
+| Suspender o canvas no modo mobile | ligado | Para o renderizador do mapa quando o canvas está ativo |
 
 ### Sobre o diálogo de uso
 

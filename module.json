@@ -2,7 +2,7 @@
   "id": "t20-mobile",
   "title": "T20 Mobile",
   "description": "Interface touch-first para Tormenta20: veja a ficha e dispare as ações do personagem pelo celular, usando as rolagens nativas do sistema.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "compatibility": {
     "minimum": "13",
     "verified": "13.351"
@@ -33,7 +33,7 @@
   ],
   "url": "https://github.com/fernandowrpg/t20-mobile",
   "manifest": "https://github.com/fernandowrpg/t20-mobile/releases/latest/download/module.json",
-  "download": "https://github.com/fernandowrpg/t20-mobile/releases/download/v0.1.0/module.zip",
+  "download": "https://github.com/fernandowrpg/t20-mobile/releases/download/v0.1.1/module.zip",
   "readme": "https://github.com/fernandowrpg/t20-mobile/blob/main/README.md",
   "bugs": "https://github.com/fernandowrpg/t20-mobile/issues",
   "license": "LICENSE",

@@ -118,6 +118,8 @@ const SETTINGS = {
 	"t20-mobile.autoMobile": true,
 	"t20-mobile.showDialogs": false,
 	"t20-mobile.killCanvas": true,
+	"t20-mobile.offerNoCanvas": true,
+	"core.noCanvas": false,
 	"tormenta20.UsageConfig": "default"
 };
 
@@ -129,7 +131,7 @@ window.game = {
 		get(ns, key) { return SETTINGS[`${ns}.${key}`]; },
 		set(ns, key, v) { SETTINGS[`${ns}.${key}`] = v; }
 	},
-	user: { character: ACTOR },
+	user: { character: ACTOR, isGM: false },
 	actors: {
 		_all: [ACTOR, ACTOR2],
 		filter(fn) { return this._all.filter(fn); },
@@ -137,8 +139,20 @@ window.game = {
 	},
 	messages: {
 		contents: [
-			{ id: "m1", content: "<div class='message-header'>Arandur</div><div>Teste de <b>Atletismo</b>: <span class='dice-total'>19</span></div>", renderHTML: null },
-			{ id: "m2", content: "<div class='message-header'>Brisa</div><div>Dano: <span class='dice-total'>11</span></div>", renderHTML: null }
+			// isAuthor true -> o usuario pode excluir a propria mensagem
+			{
+				id: "m1", isAuthor: true,
+				content: "<div class='message-header'>Arandur <a class='message-delete'>x</a></div><div>Teste de <b>Atletismo</b>: <span class='dice-total'>19</span></div>",
+				renderHTML: null,
+				delete() { log("msg.delete", { id: "m1" }); }
+			},
+			// isAuthor false e usuario nao-GM -> sem botao de excluir
+			{
+				id: "m2", isAuthor: false,
+				content: "<div class='message-header'>Brisa</div><div>Dano: <span class='dice-total'>11</span></div>",
+				renderHTML: null,
+				delete() { log("msg.delete", { id: "m2" }); }
+			}
 		]
 	}
 };

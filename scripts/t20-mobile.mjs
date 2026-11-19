@@ -34,6 +34,15 @@ Hooks.once("init", () => {
 		default: false
 	});
 
+	game.settings.register(MOD, "offerNoCanvas", {
+		name: "Oferecer desligar o canvas neste dispositivo",
+		hint: "Ao entrar no modo mobile, sugere ligar o \"Disable Game Canvas\" do Foundry, que impede a cena de ser carregada neste aparelho. E uma configuracao de cliente: nao afeta os outros jogadores.",
+		scope: "client",
+		config: true,
+		type: Boolean,
+		default: true
+	});
+
 	game.settings.register(MOD, "killCanvas", {
 		name: "Suspender o canvas no modo mobile",
 		hint: "Para o renderizador do mapa enquanto o modo mobile está ativo. Economiza muita bateria e memória no celular.",
@@ -117,6 +126,19 @@ function wantsItemDialog(item) {
 	return hasEffectsOrRolls;
 }
 
+/**
+ * "Disable Game Canvas" (core.noCanvas) e uma configuracao de CLIENTE: vale
+ * por navegador/aparelho. Ligada, o Foundry nem inicializa o WebGL nem carrega
+ * a cena, que e o que pesa num celular. Nao afeta os outros jogadores.
+ */
+function noCanvasActive() {
+	try {
+		return game.settings.get("core", "noCanvas") === true;
+	} catch {
+		return false;
+	}
+}
+
 async function guard(label, fn) {
 	try {
 		await fn();
@@ -148,6 +170,7 @@ class T20Mobile {
 		this.actor = null;
 		this.tab = "acoes";
 		this.root = null;
+		this.banner = null;
 		this._hooks = [];
 		this._tickerStopped = false;
 	}
@@ -167,6 +190,7 @@ class T20Mobile {
 		this.actor = this.pickDefaultActor();
 		this.registerHooks();
 		this.render();
+		this.maybeOfferNoCanvas();
 	}
 
 	unmount() {
@@ -175,11 +199,60 @@ class T20Mobile {
 		this.resumeCanvas();
 		this.root?.remove();
 		this.root = null;
+		this.banner?.remove();
+		this.banner = null;
 		document.body.classList.remove("t20m-on");
 		addLauncher();
 	}
 
+	/**
+	 * Suspender o ticker so ameniza: a cena ja foi carregada. Ligar o
+	 * core.noCanvas evita o carregamento por completo, mas exige recarregar.
+	 */
+	maybeOfferNoCanvas() {
+		if (!game.settings.get(MOD, "offerNoCanvas")) return;
+		if (noCanvasActive()) return;
+
+		const bar = el("div", "t20m-banner");
+		const txt = el("span", "t20m-banner-text");
+		txt.textContent = "Carregar a cena pesa no celular. Desligar o canvas neste aparelho?";
+		bar.appendChild(txt);
+
+		const yes = el("button", "t20m-banner-yes");
+		yes.type = "button";
+		yes.textContent = "Desligar e recarregar";
+		yes.addEventListener("click", async () => {
+			yes.disabled = true;
+			try {
+				await game.settings.set("core", "noCanvas", true);
+				window.location.reload();
+			} catch (err) {
+				console.error(`${MOD} | nao foi possivel ligar o noCanvas`, err);
+				ui.notifications?.error("T20 Mobile: nao consegui alterar a configuracao de canvas.");
+				yes.disabled = false;
+			}
+		});
+
+		const never = el("button", "t20m-banner-no");
+		never.type = "button";
+		never.textContent = "Agora nao";
+		never.addEventListener("click", () => {
+			game.settings.set(MOD, "offerNoCanvas", false);
+			bar.remove();
+			this.banner = null;
+		});
+
+		bar.append(yes, never);
+		// Fica no body, nao no root: render() faz replaceChildren no root e
+		// apagaria o banner a cada troca de aba. Ele e position:fixed mesmo.
+		this.banner?.remove();
+		this.banner = bar;
+		document.body.appendChild(bar);
+	}
+
 	suspendCanvas() {
+		// Com o noCanvas ligado nao existe canvas para suspender.
+		if (noCanvasActive()) return;
 		try {
 			if (canvas?.app?.ticker?.started) {
 				canvas.app.ticker.stop();
@@ -238,6 +311,8 @@ class T20Mobile {
 		on("updateItem", (doc) => { if (mine(doc)) this.render(); });
 		on("deleteItem", (doc) => { if (mine(doc)) this.render(); });
 		on("createChatMessage", () => { if (this.tab === "chat") this.render(); else this.flashChat(); });
+		on("deleteChatMessage", () => { if (this.tab === "chat") this.render(); });
+		on("updateChatMessage", () => { if (this.tab === "chat") this.render(); });
 	}
 
 	flashChat() {
@@ -549,20 +624,41 @@ class T20Mobile {
 
 		for (const msg of messages) {
 			const wrap = el("div", "t20m-msg");
+			const content = el("div", "t20m-msg-content");
 			try {
 				// v13 renomeou getHTML -> renderHTML (retorna HTMLElement).
 				if (typeof msg.renderHTML === "function") {
-					wrap.appendChild(await msg.renderHTML());
+					content.appendChild(await msg.renderHTML());
 				} else if (typeof msg.getHTML === "function") {
 					const jq = await msg.getHTML();
-					wrap.innerHTML = jq instanceof HTMLElement ? jq.outerHTML : jq[0]?.outerHTML ?? "";
+					content.innerHTML = jq instanceof HTMLElement ? jq.outerHTML : jq[0]?.outerHTML ?? "";
 				} else {
-					wrap.innerHTML = msg.content ?? "";
+					content.innerHTML = msg.content ?? "";
 				}
 			} catch (err) {
 				console.warn(`${MOD} | falha ao renderizar mensagem ${msg.id}`, err);
-				wrap.textContent = msg.content?.replace(/<[^>]*>/g, "") ?? "";
+				content.textContent = msg.content?.replace(/<[^>]*>/g, "") ?? "";
 			}
+			wrap.appendChild(content);
+
+			// Os controles nativos da mensagem sao ligados pelo ChatLog da
+			// sidebar, nao pelo elemento. Renderizado solto aqui, o botao de
+			// excluir do Foundry fica morto — entao ele e escondido via CSS e
+			// nos oferecemos o nosso, que chama msg.delete() direto.
+			if (game.user.isGM || msg.isAuthor) {
+				const actions = el("div", "t20m-msg-actions");
+				const del = el("button", "t20m-msg-del");
+				del.type = "button";
+				del.textContent = "Excluir";
+				del.title = "Excluir esta mensagem";
+				del.addEventListener("click", (ev) => {
+					ev.stopPropagation();
+					guard("excluir mensagem", () => msg.delete());
+				});
+				actions.appendChild(del);
+				wrap.appendChild(actions);
+			}
+
 			host.appendChild(wrap);
 		}
 		host.scrollTop = host.scrollHeight;

@@ -394,6 +394,79 @@ body.t20m-on {
 
 .t20m-msg img { max-width: 100%; height: auto; }
 
+/* Os controles nativos da mensagem (excluir etc.) tem os listeners ligados
+   pelo ChatLog da sidebar. Renderizada solta aqui, a mensagem vem com os
+   botoes mortos — escondemos e oferecemos o nosso em .t20m-msg-actions. */
+.t20m-msg .message-controls,
+.t20m-msg .message-delete,
+.t20m-msg a[data-action="delete"],
+.t20m-msg .message-metadata .message-control {
+	display: none !important;
+}
+
+.t20m-msg-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 6px;
+	padding-top: 6px;
+	border-top: 1px solid var(--t20m-line);
+}
+
+.t20m-msg-del {
+	min-height: 36px;
+	padding: 0 14px;
+	border-radius: 8px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface-2);
+	color: var(--t20m-muted);
+	font: 600 13px/1 inherit;
+}
+
+.t20m-msg-del:active {
+	border-color: var(--t20m-accent);
+	color: var(--t20m-text);
+}
+
+/* ---------- banner (overlay: nao entra nas linhas do grid) ---------- */
+
+.t20m-banner {
+	position: fixed;
+	left: 12px;
+	right: 12px;
+	bottom: calc(env(safe-area-inset-bottom, 0px) + 66px);
+	z-index: 120;
+	display: grid;
+	gap: 8px;
+	padding: 12px;
+	border-radius: 12px;
+	border: 1px solid var(--t20m-line);
+	background: var(--t20m-surface-2);
+	box-shadow: 0 6px 24px rgb(0 0 0 / 0.55);
+}
+
+.t20m-banner-text {
+	font-size: 14px;
+	color: var(--t20m-text);
+}
+
+.t20m-banner button {
+	min-height: var(--t20m-tap);
+	border-radius: 8px;
+	border: 1px solid var(--t20m-line);
+	font: 600 14px/1 inherit;
+}
+
+.t20m-banner-yes {
+	background: var(--t20m-accent-soft);
+	border-color: var(--t20m-accent-soft);
+	color: #fff;
+}
+
+.t20m-banner-no {
+	background: transparent;
+	color: var(--t20m-muted);
+}
+
 /* ---------- tabs ---------- */
 
 .t20m-tabs {
